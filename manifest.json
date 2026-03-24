@@ -1,0 +1,24 @@
+{
+  "name": "CampusIQ — University of Tampa",
+  "short_name": "CampusIQ",
+  "description": "Your personalized University of Tampa campus companion",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#8B0000",
+  "theme_color": "#8B0000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="CampusIQ"/>
+  <meta name="theme-color" content="#8B0000"/>
+  <title>CampusIQ — University of Tampa</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icon-192.png"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent}
+    :root{--cr:#8B0000;--gd:#C9A84C;--bg:#ffffff;--bg2:#f5f5f5;--border:#e0e0e0;--text:#1a1a1a;--text2:#666;--text3:#999}
+    body{background:#f0f0f0;display:flex;justify-content:center;min-height:100vh}
+    .app{width:100%;max-width:430px;background:var(--bg);min-height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden}
+    .scr{display:none;flex-direction:column;flex:1;overflow:hidden}.scr.on{display:flex}
+
+    .hdr{background:var(--cr);padding:env(safe-area-inset-top,16px) 16px 16px;padding-top:calc(env(safe-area-inset-top,0px) + 16px)}
+    .hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .logo{display:flex;align-items:center;gap:8px}
+    .logo-box{width:32px;height:32px;background:var(--gd);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#4a3000}
+    .logo-txt{font-size:18px;font-weight:600;color:white}
+    .logo-sub{font-size:11px;color:rgba(255,255,255,0.7)}
+    .av{width:34px;height:34px;background:var(--gd);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#4a3000;cursor:pointer;border:2px solid rgba(255,255,255,0.3)}
+    .srch{background:rgba(255,255,255,0.15);border-radius:12px;padding:9px 12px;display:flex;align-items:center;gap:8px;cursor:pointer}
+    .srch span{font-size:13px;color:rgba(255,255,255,0.65);flex:1}
+
+    .tabs{display:flex;background:white;border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{flex-shrink:0;padding:11px 13px;font-size:11px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;font-weight:500}
+    .tab.on{color:var(--cr);border-bottom-color:var(--cr);font-weight:600}
+
+    .body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;padding-bottom:80px}
+    .tc{display:none}.tc.on{display:block}
+
+    .bbar{background:white;border-top:1px solid var(--border);padding:8px 0;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 8px);display:flex;justify-content:space-around;position:sticky;bottom:0;z-index:10}
+    .bb{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 10px;border-radius:10px;transition:background 0.15s}
+    .bb:active{background:#f0f0f0}
+    .bbi{font-size:22px;opacity:0.45}
+    .bb.on .bbi{opacity:1}
+    .bbl{font-size:10px;color:var(--text2);font-weight:500}
+    .bb.on .bbl{color:var(--cr);font-weight:600}
+
+    .stitle{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.6px}
+
+    /* LOGIN */
+    .lhero{background:var(--cr);padding:60px 24px 40px;display:flex;flex-direction:column;align-items:center;padding-top:calc(env(safe-area-inset-top,0px) + 60px)}
+    .lbody{padding:32px 24px;flex:1;overflow-y:auto}
+    .linput{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:white;font-size:16px;color:var(--text);margin-bottom:14px;-webkit-appearance:none}
+    .linput:focus{outline:none;border-color:var(--cr)}
+    .llabel{font-size:13px;color:var(--text2);margin-bottom:6px;font-weight:500}
+    .obtn{width:100%;background:var(--cr);color:white;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;-webkit-appearance:none}
+    .obtn:active{opacity:0.85}
+    .odiv{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+    .odivl{flex:1;height:1px;background:var(--border)}
+    .odivt{font-size:12px;color:var(--text3)}
+
+    /* OKTA */
+    .okta-hdr{background:#00297a;padding:18px 24px;padding-top:calc(env(safe-area-inset-top,0px) + 18px);display:flex;align-items:center;gap:10px}
+    .okta-body{padding:28px 24px;flex:1;overflow-y:auto}
+    .okta-badge{display:flex;align-items:center;gap:10px;background:var(--bg2);border-radius:14px;padding:12px 16px;margin-bottom:24px;border:1px solid var(--border)}
+    .okta-uni{width:38px;height:38px;background:var(--cr);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;color:white;font-weight:700}
+    .okta-input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:white;font-size:16px;color:var(--text);margin-bottom:14px;-webkit-appearance:none}
+    .okta-input:focus{outline:none;border-color:#00297a}
+    .okta-btn{width:100%;background:#00297a;color:white;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:12px;-webkit-appearance:none}
+    .okta-btn:active{opacity:0.85}
+
+    /* LOADING */
+    .lscr-inner{background:var(--cr);flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px}
+    .lbar-wrap{width:220px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;overflow:hidden}
+    .lbar{height:100%;background:var(--gd);border-radius:2px;width:0%;transition:width 0.5s ease}
+
+    /* PROFILE */
+    .pcard{background:var(--cr);border-radius:16px;padding:16px;margin-bottom:20px;display:flex;align-items:center;gap:14px}
+    .pav{width:54px;height:54px;background:var(--gd);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#4a3000;flex-shrink:0}
+
+    /* STAT GRID */
+    .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+    .scard{background:var(--bg2);border-radius:14px;padding:14px;border:1px solid var(--border)}
+    .slabel{font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:500}
+    .sval{font-size:22px;font-weight:700;color:var(--text)}
+    .ssub{font-size:11px;color:var(--text3);margin-top:2px}
+
+    /* CLASS CARDS */
+    .ccard{display:flex;gap:12px;padding:13px;background:white;border:1px solid var(--border);border-radius:14px;margin-bottom:8px}
+    .ct{min-width:52px;text-align:center}
+    .ctv{font-size:12px;font-weight:700;color:var(--cr)}
+    .cte{font-size:10px;color:var(--text3)}
+    .ci{flex:1}
+    .cn{font-size:13px;font-weight:600;color:var(--text)}
+    .cl{font-size:11px;color:var(--text2);margin-top:2px}
+    .cbadge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;margin-top:4px;font-weight:500}
+    .b-done{background:#f0f0f0;color:#888}
+    .b-next{background:#fff0f0;color:var(--cr)}
+    .b-later{background:#eef4ff;color:#185fa5}
+
+    .mcard{background:var(--bg2);border-radius:14px;padding:14px 16px;margin-bottom:20px;border:1px solid var(--border)}
+
+    .qgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+    .qcard{background:white;border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer}
+    .qcard:active{background:#fafafa}
+    .qicon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;font-size:18px}
+
+    /* FAVORITES */
+    .fav-empty{text-align:center;padding:30px 20px;color:var(--text3);font-size:13px}
+    .fav-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:white;border:1px solid var(--border);border-radius:14px;margin-bottom:8px}
+    .fav-icon{width:36px;height:36px;background:#fff0f0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .fav-info{flex:1}
+    .fav-name{font-size:13px;font-weight:600;color:var(--text)}
+    .fav-sub{font-size:11px;color:var(--text2);margin-top:2px}
+    .fav-del{font-size:18px;color:var(--text3);cursor:pointer;padding:4px}
+
+    /* BUILDING TAGS */
+    .btag{background:white;border-radius:10px;padding:7px 12px;font-size:12px;font-weight:500;color:var(--text);border:1px solid var(--border);cursor:pointer;margin-right:6px;margin-bottom:8px;display:inline-flex;align-items:center;gap:6px}
+    .btag:active{background:#fafafa}
+    .btag-fav{color:var(--text3)}
+
+    /* MAP */
+    .map-ph{background:#e8e8e8;border-radius:14px;height:220px;margin-bottom:16px;border:1px solid var(--border);position:relative;overflow:hidden}
+    .mg{position:absolute;inset:0;opacity:0.1;background-image:linear-gradient(#333 1px,transparent 1px),linear-gradient(90deg,#333 1px,transparent 1px);background-size:30px 30px}
+    .mb{position:absolute;background:var(--cr);border-radius:4px;opacity:0.85}
+    .ml{position:absolute;font-size:9px;color:white;font-weight:600;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,0.3)}
+    .my-dot{position:absolute;width:14px;height:14px;background:#1a73e8;border-radius:50%;border:2px solid white;box-shadow:0 0 0 4px rgba(26,115,232,0.2)}
+
+    /* DINING */
+    .drow{display:flex;align-items:center;justify-content:space-between;padding:13px;background:white;border:1px solid var(--border);border-radius:14px;margin-bottom:8px}
+    .di{flex:1}
+    .dn{font-size:13px;font-weight:600;color:var(--text)}
+    .dh{font-size:11px;color:var(--text2);margin-top:2px}
+    .ds{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+    .s-open{background:#e6f7f0;color:#0a7a4a}
+    .s-busy{background:#fff5e6;color:#b36200}
+    .s-closed{background:#f0f0f0;color:#888}
+
+    /* ACADEMICS */
+    .pbar-wrap{height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden;margin-bottom:4px}
+    .pbar{height:100%;background:var(--cr);border-radius:4px}
+    .req-cat{margin-bottom:18px}
+    .req-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px}
+    .rbadge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
+    .rb-ok{background:#e6f7f0;color:#0a7a4a}
+    .rb-ip{background:#fff5e6;color:#b36200}
+    .rb-no{background:#fff0f0;color:var(--cr)}
+    .crow{display:flex;align-items:center;gap:10px;padding:10px 12px;background:white;border:1px solid var(--border);border-radius:12px;margin-bottom:6px}
+    .ccheck{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700}
+    .ck-ok{background:#e6f7f0;color:#0a7a4a;border:1.5px solid #9fe1cb}
+    .ck-ip{background:#fff5e6;color:#b36200;border:1.5px solid #fac775}
+    .ck-no{background:#f5f5f5;color:#aaa;border:1.5px solid #ddd}
+    .cname{flex:1;font-size:12px;color:var(--text);font-weight:500}
+    .ccr{font-size:11px;color:var(--text3)}
+    .cgr{font-size:11px;font-weight:700;color:#0a7a4a}
+
+    /* TUITION */
+    .tcard{background:white;border:1px solid var(--border);border-radius:16px;margin-bottom:14px;overflow:hidden}
+    .thdr{padding:13px 16px}
+    .thtitle{color:white;font-size:14px;font-weight:600}
+    .thsub{color:rgba(255,255,255,0.75);font-size:11px;margin-top:2px}
+    .tbody{padding:14px 16px}
+    .trow{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
+    .trow:last-child{border-bottom:none}
+    .titem{font-size:13px;color:var(--text)}
+    .tamt{font-size:13px;font-weight:600;color:var(--text)}
+    .ttotal{display:flex;justify-content:space-between;padding:13px 16px;background:var(--bg2)}
+    .paybtn{width:100%;background:var(--cr);color:white;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:600;cursor:pointer;margin-top:12px;-webkit-appearance:none}
+    .paybtn:active{opacity:0.85}
+
+    /* TRANSPORT */
+    .tpcard{background:white;border:1px solid var(--border);border-radius:16px;margin-bottom:12px;overflow:hidden}
+    .tphdr{padding:13px 16px;display:flex;align-items:center;gap:10px}
+    .tpbody{padding:14px 16px}
+    .lsrow{display:flex;justify-content:space-between;margin-bottom:8px}
+    .lst{text-align:center;flex:1}
+    .lstv{font-size:20px;font-weight:700;color:var(--cr)}
+    .lstl{font-size:10px;color:var(--text2);margin-top:2px}
+    .dvdr{height:1px;background:var(--border);margin:12px 0}
+    .ibanner{background:#fffbea;border-radius:12px;padding:10px 13px;font-size:12px;color:#7a5800;margin-bottom:16px;line-height:1.5;border:1px solid #ffe58f}
+    .rbtn{width:100%;background:var(--cr);color:white;border:none;border-radius:12px;padding:13px;font-size:13px;font-weight:600;cursor:pointer;-webkit-appearance:none}
+    .rbtn:active{opacity:0.85}
+
+    /* AI CHAT */
+    .chat-area{background:var(--bg2);border-radius:14px;padding:14px;margin-bottom:14px;min-height:140px;max-height:340px;overflow-y:auto}
+    .ai-msg{display:flex;gap:8px;margin-bottom:12px}
+    .ai-av{width:30px;height:30px;background:var(--cr);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:white;font-weight:700;flex-shrink:0}
+    .ai-bub{background:white;border-radius:14px;padding:9px 13px;font-size:13px;color:var(--text);border:1px solid var(--border);max-width:85%;line-height:1.5}
+    .user-msg{flex-direction:row-reverse}
+    .user-bub{background:var(--cr);color:white;border-color:transparent}
+    .ai-input-row{display:flex;gap:8px}
+    .ai-input{flex:1;padding:11px 14px;border-radius:12px;border:1px solid var(--border);background:white;font-size:16px;color:var(--text);-webkit-appearance:none}
+    .ai-input:focus{outline:none;border-color:var(--cr)}
+    .ai-send{background:var(--cr);color:white;border:none;border-radius:12px;padding:11px 16px;font-size:16px;font-weight:600;cursor:pointer;-webkit-appearance:none}
+    .ai-send:active{opacity:0.85}
+    .chip{background:white;color:var(--text);border:1px solid var(--border);border-radius:20px;padding:6px 12px;font-size:12px;cursor:pointer;display:inline-block;margin-right:6px;margin-bottom:6px;font-weight:500}
+    .chip:active{background:var(--bg2)}
+
+    .sday{font-size:12px;font-weight:700;color:var(--text2);margin:14px 0 8px;text-transform:uppercase;letter-spacing:0.6px}
+    .alert-banner{border-radius:12px;padding:10px 13px;font-size:12px;margin-bottom:16px;line-height:1.5;border:1px solid}
+    .alert-red{background:#fff0f0;color:var(--cr);border-color:#ffcdd2}
+    .alert-green{background:#e6f7f0;color:#0a7a4a;border-color:#b2dfdb}
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- LOGIN -->
+  <div class="scr on" id="s-login">
+    <div class="lhero">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:48px;height:48px;background:var(--gd);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#4a3000">IQ</div>
+        <div style="font-size:28px;font-weight:700;color:white">CampusIQ</div>
+      </div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.7);letter-spacing:1.5px;text-transform:uppercase">University of Tampa</div>
+    </div>
+    <div class="lbody">
+      <p style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">Welcome back</p>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.5">Sign in with your UT credentials to access your personalized campus experience.</p>
+      <button class="obtn" onclick="go('s-okta')">
+        <svg width="18" height="18" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="white" opacity="0.35"/><circle cx="20" cy="20" r="8" fill="white"/></svg>
+        Sign in with MyUTampa (Okta)
+      </button>
+      <div class="odiv"><div class="odivl"></div><div class="odivt">or continue with email</div><div class="odivl"></div></div>
+      <div class="llabel">UT Email</div>
+      <input class="linput" type="email" placeholder="yourname@ut.edu" autocomplete="email"/>
+      <div class="llabel">Password</div>
+      <input class="linput" type="password" placeholder="••••••••" autocomplete="current-password"/>
+      <button class="obtn" onclick="go('s-okta')">Sign In</button>
+      <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:20px;line-height:1.7">By signing in you agree to UT's Terms of Service.<br>Need help? <span style="color:var(--cr)">help@ut.edu</span></div>
+    </div>
+  </div>
+
+  <!-- OKTA -->
+  <div class="scr" id="s-okta">
+    <div class="okta-hdr">
+      <svg width="20" height="20" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#007DC1"/><circle cx="20" cy="20" r="8" fill="white"/></svg>
+      <div style="font-size:14px;font-weight:600;color:white">Okta Secure Sign-On</div>
+    </div>
+    <div class="okta-body">
+      <div class="okta-badge">
+        <div class="okta-uni">UT</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">University of Tampa</div>
+          <div style="font-size:11px;color:var(--text2)">MyUTampa Student Portal</div>
+        </div>
+      </div>
+      <div style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:6px">Sign in</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:24px">Enter your UT NetID and password</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500">UT NetID</div>
+      <input class="okta-input" type="text" placeholder="e.g. mstone01" autocomplete="username"/>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500">Password</div>
+      <input class="okta-input" type="password" placeholder="••••••••" autocomplete="current-password"/>
+      <button class="okta-btn" onclick="doLogin()">Sign In</button>
+      <div style="font-size:13px;color:#00297a;text-align:center;cursor:pointer;font-weight:500">Forgot password?</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:24px;padding-top:16px;border-top:1px solid var(--border)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <div style="font-size:11px;color:var(--text3);line-height:1.4">Protected by Okta — your credentials are never shared with CampusIQ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="scr" id="s-loading">
+    <div class="lscr-inner">
+      <div style="font-size:50px;margin-bottom:20px">🎓</div>
+      <div style="font-size:28px;font-weight:700;color:white;margin-bottom:8px">CampusIQ</div>
+      <div style="font-size:14px;color:rgba(255,255,255,0.7);margin-bottom:40px">Setting up your experience...</div>
+      <div class="lbar-wrap"><div class="lbar" id="lb"></div></div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-top:14px;text-align:center" id="ls">Authenticating with MyUTampa...</div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div class="scr" id="s-app" style="flex-direction:column">
+    <div class="hdr">
+      <div class="hdr-top">
+        <div class="logo">
+          <div class="logo-box">IQ</div>
+          <div><div class="logo-txt">CampusIQ</div><div class="logo-sub">University of Tampa</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-size:12px;color:rgba(255,255,255,0.85);font-weight:500">Hi, Michael 👋</div>
+          <div class="av" onclick="go('s-login')">MS</div>
+        </div>
+      </div>
+      <div class="srch">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span>Search buildings, dining, events...</span>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab on" onclick="st('home',this)">Home</div>
+      <div class="tab" onclick="st('academics',this)">Academics</div>
+      <div class="tab" onclick="st('tuition',this)">Tuition</div>
+      <div class="tab" onclick="st('schedule',this)">Schedule</div>
+      <div class="tab" onclick="st('map',this)">Map</div>
+      <div class="tab" onclick="st('dining',this)">Dining</div>
+      <div class="tab" onclick="st('ai',this)">AI Help</div>
+      <div class="tab" onclick="st('transport',this)">Transport</div>
+    </div>
+
+    <div class="body">
+
+      <!-- HOME -->
+      <div id="tc-home" class="tc on">
+        <div class="pcard">
+          <div class="pav">MS</div>
+          <div>
+            <div style="font-size:17px;font-weight:700;color:white">Michael Stone</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:2px">Business Administration • Junior</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:2px">Student ID: U98765432 • GPA: 3.4</div>
+          </div>
+        </div>
+        <div class="stitle">Academic Snapshot</div>
+        <div class="sgrid">
+          <div class="scard"><div class="slabel">Credits completed</div><div class="sval">87</div><div class="ssub">of 120 required</div></div>
+          <div class="scard"><div class="slabel">Credits remaining</div><div class="sval">33</div><div class="ssub">~3 semesters</div></div>
+          <div class="scard"><div class="slabel">Current GPA</div><div class="sval">3.4</div><div class="ssub">Dean's List eligible</div></div>
+          <div class="scard"><div class="slabel">Balance due</div><div class="sval" style="color:var(--cr)">$2,340</div><div class="ssub">Due May 1</div></div>
+        </div>
+        <div class="stitle">Today's Classes</div>
+        <div class="ccard"><div class="ct"><div class="ctv">9:30</div><div class="cte">10:45 AM</div></div><div class="ci"><div class="cn">MAN 3025 — Management</div><div class="cl">Sykes College, Rm 201</div><div class="cbadge b-done">Completed</div></div></div>
+        <div class="ccard"><div class="ct"><div class="ctv">12:30</div><div class="cte">1:45 PM</div></div><div class="ci"><div class="cn">MKT 3010 — Marketing</div><div class="cl">Plant Hall, Rm 114</div><div class="cbadge b-next">Up next</div></div></div>
+        <div class="ccard"><div class="ct"><div class="ctv">3:30</div><div class="cte">4:45 PM</div></div><div class="ci"><div class="cn">FIN 3101 — Finance</div><div class="cl">Vaughn Center, Rm 310</div><div class="cbadge b-later">Later today</div></div></div>
+        <div class="stitle" style="margin-top:16px">Meal Plan</div>
+        <div class="mcard">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:13px;color:var(--text2);font-weight:500">Dining Dollars remaining</div><div style="font-size:15px;font-weight:700;color:var(--cr)">$183.50</div></div>
+          <div style="height:6px;background:#e0e0e0;border-radius:3px;overflow:hidden"><div style="height:100%;background:var(--cr);border-radius:3px;width:62%"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px"><div style="font-size:11px;color:var(--text3)">62% remaining</div><div style="font-size:11px;color:var(--text3)">Resets May 10</div></div>
+        </div>
+        <div class="stitle">Quick Access</div>
+        <div class="qgrid">
+          <div class="qcard" onclick="st('academics',document.querySelectorAll('.tab')[1]);sba('bb-acad')"><div class="qicon" style="background:#f3f0fe">🎓</div><div style="font-size:13px;font-weight:600;color:var(--text)">Academics</div><div style="font-size:11px;color:var(--text2);margin-top:2px">33 credits left</div></div>
+          <div class="qcard" onclick="st('tuition',document.querySelectorAll('.tab')[2]);sba('bb-tuit')"><div class="qicon" style="background:#fff0f0">💳</div><div style="font-size:13px;font-weight:600;color:var(--text)">Tuition</div><div style="font-size:11px;color:var(--text2);margin-top:2px">$2,340 due May 1</div></div>
+          <div class="qcard" onclick="st('map',document.querySelectorAll('.tab')[4]);sba('bb-map')"><div class="qicon" style="background:#fff0f0">🗺️</div><div style="font-size:13px;font-weight:600;color:var(--text)">Campus Map</div><div style="font-size:11px;color:var(--text2);margin-top:2px">Find any building</div></div>
+          <div class="qcard" onclick="st('ai',document.querySelectorAll('.tab')[6]);sba('bb-ai')"><div class="qicon" style="background:#f0f7ff">🤖</div><div style="font-size:13px;font-weight:600;color:var(--text)">AI Assistant</div><div style="font-size:11px;color:var(--text2);margin-top:2px">Ask me anything</div></div>
+        </div>
+      </div>
+
+      <!-- ACADEMICS -->
+      <div id="tc-academics" class="tc">
+        <div style="background:var(--bg2);border-radius:16px;padding:16px;margin-bottom:20px;border:1px solid var(--border)">
+          <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px">Degree Progress — B.S. Business Administration</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-size:13px;font-weight:500;color:var(--text)">Overall completion</div><div style="font-size:13px;color:var(--cr);font-weight:700">73%</div></div>
+          <div class="pbar-wrap"><div class="pbar" style="width:73%"></div></div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:14px">87 of 120 credits completed</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div style="text-align:center"><div style="font-size:18px;font-weight:700;color:#0a7a4a">87</div><div style="font-size:10px;color:var(--text2);font-weight:500">Completed</div></div>
+            <div style="text-align:center"><div style="font-size:18px;font-weight:700;color:#b36200">15</div><div style="font-size:10px;color:var(--text2);font-weight:500">In Progress</div></div>
+            <div style="text-align:center"><div style="font-size:18px;font-weight:700;color:var(--cr)">18</div><div style="font-size:10px;color:var(--text2);font-weight:500">Remaining</div></div>
+          </div>
+        </div>
+        <div class="stitle">Courses Remaining</div>
+        <div class="req-cat">
+          <div class="req-title">Core Business Requirements <span class="rbadge rb-ip">2 in progress</span></div>
+          <div class="crow"><div class="ccheck ck-ok">✓</div><div class="cname">MAN 3025 — Principles of Management</div><div class="cgr">B+</div></div>
+          <div class="crow"><div class="ccheck ck-ip">→</div><div class="cname">MKT 3010 — Marketing Principles</div><div class="ccr">3 cr</div></div>
+          <div class="crow"><div class="ccheck ck-ip">→</div><div class="cname">FIN 3101 — Financial Management</div><div class="ccr">3 cr</div></div>
+          <div class="crow"><div class="ccheck ck-no">○</div><div class="cname">MAN 4720 — Strategic Management</div><div class="ccr">3 cr</div></div>
+          <div class="crow"><div class="ccheck ck-no">○</div><div class="cname">MAN 4301 — Human Resources Mgmt</div><div class="ccr">3 cr</div></div>
+        </div>
+        <div class="req-cat">
+          <div class="req-title">Business Electives <span class="rbadge rb-no">3 remaining</span></div>
+          <div class="crow"><div class="ccheck ck-ok">✓</div><div class="cname">MKT 3420 — Consumer Behavior</div><div class="cgr">A-</div></div>
+          <div class="crow"><div class="ccheck ck-no">○</div><div class="cname">MAN 4450 — Organizational Behavior</div><div class="ccr">3 cr</div></div>
+          <div class="crow"><div class="ccheck ck-no">○</div><div class="cname">FIN 4210 — Investment Analysis</div><div class="ccr">3 cr</div></div>
+          <div class="crow"><div class="ccheck ck-no">○</div><div class="cname">MKT 4600 — Digital Marketing</div><div class="ccr">3 cr</div></div>
+        </div>
+        <div class="req-cat">
+          <div class="req-title">General Education <span class="rbadge rb-ok">Complete</span></div>
+          <div class="crow"><div class="ccheck ck-ok">✓</div><div class="cname">ENC 1101 — English Composition I</div><div class="cgr">A</div></div>
+          <div class="crow"><div class="ccheck ck-ok">✓</div><div class="cname">MAC 2233 — Calculus for Business</div><div class="cgr">B+</div></div>
+          <div class="crow"><div class="ccheck ck-ok">✓</div><div class="cname">ECO 2013 — Macroeconomics</div><div class="cgr">A-</div></div>
+        </div>
+        <div class="req-cat">
+          <div class="req-title">Capstone <span class="rbadge rb-no">Not started</span></div>
+          <div class="crow"><div class="ccheck ck-no">○</div><div class="cname">BUS 4900 — Senior Capstone Project</div><div class="ccr">3 cr</div></div>
+        </div>
+      </div>
+
+      <!-- TUITION -->
+      <div id="tc-tuition" class="tc">
+        <div class="alert-banner alert-red">Balance of $2,340.00 due by May 1, 2025. Late fees apply after due date.</div>
+        <div class="tcard">
+          <div class="thdr" style="background:var(--cr)"><div class="thtitle">Spring 2025 — Charges</div><div class="thsub">Synced from Workday via MyUTampa</div></div>
+          <div class="tbody">
+            <div class="trow"><div class="titem">Tuition (15 credit hours)</div><div class="tamt">$15,750.00</div></div>
+            <div class="trow"><div class="titem">Technology Fee</div><div class="tamt">$250.00</div></div>
+            <div class="trow"><div class="titem">Student Activity Fee</div><div class="tamt">$175.00</div></div>
+            <div class="trow"><div class="titem">Health Services Fee</div><div class="tamt">$150.00</div></div>
+            <div class="trow"><div class="titem">Housing — Straz Hall</div><div class="tamt">$4,200.00</div></div>
+            <div class="trow"><div class="titem">Dining Plan — Gold</div><div class="tamt">$2,100.00</div></div>
+          </div>
+          <div class="ttotal"><div style="font-size:13px;font-weight:600;color:var(--text)">Total Charges</div><div style="font-size:15px;font-weight:700;color:var(--text)">$22,625.00</div></div>
+        </div>
+        <div class="tcard">
+          <div class="thdr" style="background:#0a7a4a"><div class="thtitle">Financial Aid & Credits</div><div class="thsub">Spring 2025</div></div>
+          <div class="tbody">
+            <div class="trow"><div class="titem">Merit Scholarship</div><div class="tamt" style="color:#0a7a4a">-$8,000.00</div></div>
+            <div class="trow"><div class="titem">Federal Pell Grant</div><div class="tamt" style="color:#0a7a4a">-$3,200.00</div></div>
+            <div class="trow"><div class="titem">Subsidized Loan</div><div class="tamt" style="color:#0a7a4a">-$3,500.00</div></div>
+            <div class="trow"><div class="titem">Unsubsidized Loan</div><div class="tamt" style="color:#0a7a4a">-$5,585.00</div></div>
+          </div>
+          <div class="ttotal" style="background:#e6f7f0"><div style="font-size:13px;font-weight:600;color:var(--text)">Total Aid</div><div style="font-size:15px;font-weight:700;color:#0a7a4a">-$20,285.00</div></div>
+        </div>
+        <div style="background:var(--bg2);border-radius:16px;padding:16px;border:1px solid var(--border);margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:14px;font-weight:600;color:var(--text)">Balance Due</div><div style="font-size:22px;font-weight:700;color:var(--cr)">$2,340.00</div></div>
+          <div style="font-size:12px;color:var(--text3);margin-top:4px">Due date: May 1, 2025</div>
+          <button class="paybtn">Pay Now via Workday ↗</button>
+        </div>
+        <div class="tcard">
+          <div class="thdr" style="background:#444"><div class="thtitle">Payment History</div></div>
+          <div class="tbody">
+            <div class="trow"><div class="titem">Fall 2024</div><div class="tamt" style="color:#0a7a4a">Paid ✓</div></div>
+            <div class="trow"><div class="titem">Spring 2024</div><div class="tamt" style="color:#0a7a4a">Paid ✓</div></div>
+            <div class="trow"><div class="titem">Fall 2023</div><div class="tamt" style="color:#0a7a4a">Paid ✓</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCHEDULE -->
+      <div id="tc-schedule" class="tc">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="font-size:15px;font-weight:700;color:var(--text)">Spring 2025 Schedule</div>
+          <div style="font-size:11px;color:var(--cr);font-weight:600">Synced via Workday</div>
+        </div>
+        <div class="sday">Monday & Wednesday</div>
+        <div class="ccard"><div class="ct"><div class="ctv">9:30</div><div class="cte">10:45 AM</div></div><div class="ci"><div class="cn">MAN 3025 — Principles of Management</div><div class="cl">Sykes College, Rm 201 • Prof. Williams</div></div></div>
+        <div class="ccard"><div class="ct"><div class="ctv">12:30</div><div class="cte">1:45 PM</div></div><div class="ci"><div class="cn">MKT 3010 — Marketing Principles</div><div class="cl">Plant Hall, Rm 114 • Prof. Martinez</div></div></div>
+        <div class="sday">Tuesday & Thursday</div>
+        <div class="ccard"><div class="ct"><div class="ctv">11:00</div><div class="cte">12:15 PM</div></div><div class="ci"><div class="cn">ECO 2013 — Macroeconomics</div><div class="cl">Reeves Theater, Rm 105 • Prof. Chen</div></div></div>
+        <div class="ccard"><div class="ct"><div class="ctv">3:30</div><div class="cte">4:45 PM</div></div><div class="ci"><div class="cn">FIN 3101 — Financial Management</div><div class="cl">Vaughn Center, Rm 310 • Prof. Johnson</div></div></div>
+        <div class="sday">Friday</div>
+        <div class="ccard"><div class="ct"><div class="ctv">10:00</div><div class="cte">10:50 AM</div></div><div class="ci"><div class="cn">BUS 3000 — Business Communications</div><div class="cl">Plant Hall, Rm 220 • Prof. Davis</div></div></div>
+      </div>
+
+      <!-- MAP -->
+      <div id="tc-map" class="tc">
+        <div class="map-ph">
+          <div class="mg"></div>
+          <div class="mb" style="width:70px;height:45px;top:40px;left:60px"></div><div class="ml" style="top:54px;left:63px">Plant Hall</div>
+          <div class="mb" style="width:50px;height:35px;top:110px;left:180px"></div><div class="ml" style="top:122px;left:181px">Sykes<br>Chapel</div>
+          <div class="mb" style="width:55px;height:40px;top:50px;left:260px"></div><div class="ml" style="top:62px;left:262px">Vaughn<br>Center</div>
+          <div class="mb" style="width:45px;height:30px;top:140px;left:60px"></div><div class="ml" style="top:150px;left:63px">Martinez</div>
+          <div class="my-dot" style="bottom:38px;right:58px"></div>
+          <div style="position:absolute;bottom:8px;right:8px;background:white;border-radius:8px;padding:4px 10px;font-size:10px;color:var(--text2);border:1px solid var(--border);font-weight:500">You are here</div>
+        </div>
+        <div class="stitle">Find a Building</div>
+        <div id="building-list">
+          <div class="btag" onclick="toggleFav(this,'Plant Hall','🏛️','Historic main building — admin & classrooms')">🏛️ Plant Hall <span class="btag-fav">♡</span></div>
+          <div class="btag" onclick="toggleFav(this,'Vaughn Center','🏢','Student union — dining, activities')">🏢 Vaughn Center <span class="btag-fav">♡</span></div>
+          <div class="btag" onclick="toggleFav(this,'Sykes Chapel','⛪','Chapel & event space')">⛪ Sykes Chapel <span class="btag-fav">♡</span></div>
+          <div class="btag" onclick="toggleFav(this,'Martinez Athletics','🏋️','Gym & athletics center')">🏋️ Martinez Athletics <span class="btag-fav">♡</span></div>
+          <div class="btag" onclick="toggleFav(this,'Macdonald-Kelce Library','📚','Main library — has Peet\'s Coffee')">📚 Library <span class="btag-fav">♡</span></div>
+          <div class="btag" onclick="toggleFav(this,'Reeves Theater','🎭','Theater & lecture hall')">🎭 Reeves Theater <span class="btag-fav">♡</span></div>
+          <div class="btag" onclick="toggleFav(this,'Sykes College of Business','💼','Business school classes')">💼 Sykes Business <span class="btag-fav">♡</span></div>
+          <div class="btag" onclick="toggleFav(this,'Straz Hall','🏠','Residence hall')">🏠 Straz Hall <span class="btag-fav">♡</span></div>
+        </div>
+        <div style="margin-top:16px" class="stitle">My Favorite Places</div>
+        <div id="favs-map">
+          <div class="fav-empty">Tap ♡ on any building above to save it here</div>
+        </div>
+      </div>
+
+      <!-- DINING -->
+      <div id="tc-dining" class="tc">
+        <div class="alert-banner alert-green">You have $183.50 in Dining Dollars remaining this semester.</div>
+        <div class="stitle">Dining Locations</div>
+        <div class="drow"><div class="di"><div class="dn">Chill — Main Dining Hall</div><div class="dh">Open until 9:00 PM</div></div><div class="ds s-open">Open</div></div>
+        <div class="drow"><div class="di"><div class="dn">Starbucks — Vaughn Center</div><div class="dh">Open until 6:00 PM</div></div><div class="ds s-busy">Busy</div></div>
+        <div class="drow"><div class="di"><div class="dn">Chick-fil-A — Vaughn Center</div><div class="dh">Open until 8:00 PM</div></div><div class="ds s-open">Open</div></div>
+        <div class="drow"><div class="di"><div class="dn">Subway — Vaughn Center</div><div class="dh">Open until 8:00 PM</div></div><div class="ds s-open">Open</div></div>
+        <div class="drow"><div class="di"><div class="dn">Peet's Coffee — Library</div><div class="dh">Closed — Opens 7:00 AM</div></div><div class="ds s-closed">Closed</div></div>
+      </div>
+
+      <!-- AI HELP -->
+      <div id="tc-ai" class="tc">
+        <div class="chat-area" id="chatArea">
+          <div class="ai-msg">
+            <div class="ai-av">IQ</div>
+            <div class="ai-bub">Hi Michael! I'm your CampusIQ assistant. I know your schedule, campus layout, dining, and more. What can I help you with?</div>
+          </div>
+        </div>
+        <div class="ai-input-row">
+          <input class="ai-input" id="aiInput" placeholder="Ask anything about campus..." onkeydown="if(event.key==='Enter')sendAI()"/>
+          <button class="ai-send" onclick="sendAI()">↑</button>
+        </div>
+        <div style="margin-top:12px">
+          <div class="stitle">Try asking</div>
+          <div class="chip" onclick="fq('Where is Plant Hall?')">Where is Plant Hall?</div>
+          <div class="chip" onclick="fq('What dining is open right now?')">Dining open now?</div>
+          <div class="chip" onclick="fq('What classes do I have left for my degree?')">Classes remaining?</div>
+          <div class="chip" onclick="fq('How does Laser Team work at UT?')">Laser Team hours?</div>
+          <div class="chip" onclick="fq('What events are happening on campus today?')">Events today?</div>
+          <div class="chip" onclick="fq('I am a new student, give me a quick campus orientation')">Campus orientation</div>
+        </div>
+      </div>
+
+      <!-- TRANSPORT -->
+      <div id="tc-transport" class="tc">
+        <div class="ibanner">CampusIQ adapts to each university — other campuses can show bus routes, shuttle trackers, or subway maps here.</div>
+        <div class="tpcard">
+          <div class="tphdr" style="background:#444"><div style="font-size:22px">🚗</div><div><div style="color:white;font-size:14px;font-weight:600">Parking & Lots</div><div style="color:rgba(255,255,255,0.75);font-size:11px">Campus parking availability</div></div></div>
+          <div class="tpbody">
+            <div class="drow" style="margin-bottom:8px"><div class="di"><div class="dn">Lot A — North Campus</div><div class="dh">General student parking</div></div><div class="ds s-open">Open</div></div>
+            <div class="drow" style="margin-bottom:8px"><div class="di"><div class="dn">Lot B — Vaughn Center</div><div class="dh">Visitor & commuter</div></div><div class="ds s-busy">Limited</div></div>
+            <div class="drow"><div class="di"><div class="dn">Garage — Kennedy Blvd</div><div class="dh">Multi-level parking</div></div><div class="ds s-open">Open</div></div>
+          </div>
+        </div>
+        <div class="tpcard">
+          <div class="tphdr" style="background:var(--cr)"><div style="font-size:22px">⛳</div><div><div style="color:white;font-size:14px;font-weight:600">Laser Team</div><div style="color:rgba(255,255,255,0.75);font-size:11px">University of Tampa golf cart service</div></div></div>
+          <div class="tpbody">
+            <div class="lsrow"><div class="lst"><div class="lstv">3</div><div class="lstl">Carts active</div></div><div class="lst"><div class="lstv">~6 min</div><div class="lstl">Avg wait</div></div><div class="lst"><div class="lstv">Open</div><div class="lstl">Status</div></div></div>
+            <div class="dvdr"></div>
+            <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6">Laser Team provides on-demand golf cart rides anywhere on campus. Sun–Thu 7:30 PM – 2:00 AM, Fri–Sat 7:30 PM – 3:00 AM.</div>
+            <button class="rbtn" onclick="fq('How do I request a Laser Team ride at UT? Where are the pickup spots?')">Request a Ride via AI ↗</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end .body -->
+
+    <div class="bbar">
+      <div class="bb on" id="bb-home" onclick="st('home',document.querySelectorAll('.tab')[0]);sba('bb-home')"><div class="bbi">🏠</div><div class="bbl">Home</div></div>
+      <div class="bb" id="bb-acad" onclick="st('academics',document.querySelectorAll('.tab')[1]);sba('bb-acad')"><div class="bbi">🎓</div><div class="bbl">Academics</div></div>
+      <div class="bb" id="bb-tuit" onclick="st('tuition',document.querySelectorAll('.tab')[2]);sba('bb-tuit')"><div class="bbi">💳</div><div class="bbl">Tuition</div></div>
+      <div class="bb" id="bb-map" onclick="st('map',document.querySelectorAll('.tab')[4]);sba('bb-map')"><div class="bbi">🗺️</div><div class="bbl">Map</div></div>
+      <div class="bb" id="bb-ai" onclick="st('ai',document.querySelectorAll('.tab')[6]);sba('bb-ai')"><div class="bbi">🤖</div><div class="bbl">AI Help</div></div>
+    </div>
+
+  </div><!-- end s-app -->
+</div><!-- end .app -->
+
+<script>
+function go(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on')}
+
+function doLogin(){
+  go('s-loading');
+  const steps=['Authenticating with MyUTampa...','Syncing course schedule from Workday...','Loading degree requirements...','Fetching tuition & financial aid...','Pulling dining dollars balance...','All set — welcome back, Michael! 🎉'];
+  let i=0;
+  const bar=document.getElementById('lb'),status=document.getElementById('ls');
+  const iv=setInterval(()=>{
+    i++;
+    bar.style.width=(i/steps.length*100)+'%';
+    if(steps[i])status.textContent=steps[i];
+    if(i>=steps.length-1){clearInterval(iv);setTimeout(()=>go('s-app'),800)}
+  },700)
+}
+
+function st(name,el){
+  document.querySelectorAll('.tc').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('tc-'+name).classList.add('on');
+  if(el)el.classList.add('on')
+}
+
+function sba(id){document.querySelectorAll('.bb').forEach(b=>b.classList.remove('on'));document.getElementById(id).classList.add('on')}
+
+// FAVORITES
+let favs=JSON.parse(localStorage.getItem('campusiq_favs')||'{}');
+function toggleFav(el,name,icon,desc){
+  const span=el.querySelector('.btag-fav');
+  if(favs[name]){
+    delete favs[name];
+    span.textContent='♡';
+    el.style.borderColor='';
+    el.style.color='';
+  }else{
+    favs[name]={icon,desc};
+    span.textContent='♥';
+    el.style.borderColor='var(--cr)';
+    el.style.color='var(--cr)';
+  }
+  localStorage.setItem('campusiq_favs',JSON.stringify(favs));
+  renderFavs();
+}
+function renderFavs(){
+  const container=document.getElementById('favs-map');
+  const keys=Object.keys(favs);
+  if(keys.length===0){container.innerHTML='<div class="fav-empty">Tap ♡ on any building above to save it here</div>';return}
+  container.innerHTML=keys.map(name=>`
+    <div class="fav-row">
+      <div class="fav-icon">${favs[name].icon}</div>
+      <div class="fav-info"><div class="fav-name">${name}</div><div class="fav-sub">${favs[name].desc}</div></div>
+      <div class="fav-del" onclick="removeFav('${name}')">✕</div>
+    </div>`).join('');
+}
+function removeFav(name){
+  delete favs[name];
+  localStorage.setItem('campusiq_favs',JSON.stringify(favs));
+  document.querySelectorAll('.btag').forEach(el=>{
+    if(el.textContent.includes(name)){
+      el.querySelector('.btag-fav').textContent='♡';
+      el.style.borderColor='';el.style.color='';
+    }
+  });
+  renderFavs();
+}
+window.addEventListener('load',()=>{
+  renderFavs();
+  Object.keys(favs).forEach(name=>{
+    document.querySelectorAll('.btag').forEach(el=>{
+      if(el.textContent.includes(name)){
+        el.querySelector('.btag-fav').textContent='♥';
+        el.style.borderColor='var(--cr)';el.style.color='var(--cr)';
+      }
+    });
+  });
+});
+
+// AI ASSISTANT
+let chatHistory=[];
+function fq(q){
+  document.getElementById('aiInput').value=q;
+  st('ai',document.querySelectorAll('.tab')[6]);
+  sba('bb-ai');
+  setTimeout(sendAI,100);
+}
+async function sendAI(){
+  const input=document.getElementById('aiInput');
+  const msg=input.value.trim();
+  if(!msg)return;
+  input.value='';
+  const chatArea=document.getElementById('chatArea');
+  const userDiv=document.createElement('div');
+  userDiv.className='ai-msg user-msg';
+  userDiv.innerHTML=`<div class="ai-av" style="background:#e0e0e0;color:#555">MS</div><div class="ai-bub user-bub">${msg}</div>`;
+  chatArea.appendChild(userDiv);
+  const loadDiv=document.createElement('div');
+  loadDiv.className='ai-msg';
+  loadDiv.innerHTML=`<div class="ai-av">IQ</div><div class="ai-bub" style="color:#aaa">Thinking...</div>`;
+  chatArea.appendChild(loadDiv);
+  chatArea.scrollTop=chatArea.scrollHeight;
+  chatHistory.push({role:'user',content:msg});
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`You are CampusIQ, the AI assistant for the University of Tampa. You know this student personally: Michael Stone, Junior, Business Administration major, GPA 3.4, Student ID U98765432. Current classes: MAN 3025 (Management, Sykes College Rm 201, MW 9:30-10:45am, Prof. Williams), MKT 3010 (Marketing, Plant Hall Rm 114, MW 12:30-1:45pm, Prof. Martinez), FIN 3101 (Finance, Vaughn Center Rm 310, TTh 3:30-4:45pm, Prof. Johnson), ECO 2013 (Macro, Reeves Theater Rm 105, TTh 11am-12:15pm, Prof. Chen), BUS 3000 (Communications, Plant Hall Rm 220, Fri 10-10:50am, Prof. Davis). 87 of 120 credits completed, 33 remaining. Dining Dollars balance: $183.50. Tuition balance due: $2,340 by May 1. Key buildings: Plant Hall (main iconic building, admin), Vaughn Center (student union, dining - Starbucks, Chick-fil-A, Subway), Martinez Athletics Center, Sykes Chapel, Macdonald-Kelce Library (Peet's Coffee), Reeves Theater, Straz Hall (dorm). Laser Team is the on-demand golf cart ride service, Sun-Thu 7:30PM-2AM, Fri-Sat 7:30PM-3AM. School colors Crimson and Gold. Mascot Rocky the Spartan. Be warm, helpful, and concise. Use Michael's name occasionally.`,
+        messages:chatHistory
+      })
+    });
+    const data=await res.json();
+    const reply=data.content?.[0]?.text||'Sorry, I ran into an issue. Please try again.';
+    chatHistory.push({role:'assistant',content:reply});
+    loadDiv.innerHTML=`<div class="ai-av">IQ</div><div class="ai-bub">${reply}</div>`;
+  }catch(err){
+    loadDiv.innerHTML=`<div class="ai-av">IQ</div><div class="ai-bub" style="color:#aaa">Connection error. Please check your internet and try again.</div>`;
+  }
+  chatArea.scrollTop=chatArea.scrollHeight;
+}
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
